@@ -125,12 +125,17 @@ module SpreeSpringboard
         # Create ReturnAuthorization
         #
         def create_spree_return_authorization(order, springboard_return)
-          return_authorization = Spree::ReturnAuthorization.create!(
+          return_authorization = Spree::ReturnAuthorization.new(
             order: order,
             stock_location: spree_stock_location,
             return_authorization_reason_id: Spree::ReturnAuthorizationReason.active.first.id,
             memo: "Springboard Return ##{springboard_return[:id]}"
           )
+
+          unless return_authorization.save
+            raise "Unable to create return authorization for order #{ order.id }: #{ return_authorization.errors.full_messages.join(', ')}"
+          end
+
           return_authorization.springboard_id = springboard_return[:id]
           return_authorization
         end
